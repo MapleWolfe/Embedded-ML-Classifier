@@ -107,7 +107,7 @@ void setup(void) {
 
 void loop() {
   delay(1000);
-  /* Get new sensor 1 events with the readings */
+  // Get new sensor 1 events with the readings */
   sensors_event_t a1, g1, temp1;
   mpu1.getEvent(&a1, &g1, &temp1);
   sensor_1_ax = a1.acceleration.x;
@@ -117,7 +117,7 @@ void loop() {
   sensor_1_gy = g1.gyro.y;
   sensor_1_gz = g1.gyro.z;
   
-  /* Get new sensor 2 events with the readings */
+  // Get new sensor 2 events with the readings */
   sensors_event_t a2, g2, temp2;
   mpu2.getEvent(&a2, &g2, &temp2);
   sensor_2_ax = a2.acceleration.x;
@@ -140,7 +140,7 @@ void loop() {
     onboard_gy = gyroY;
     onboard_gz = gyroZ;
   }
-  /* Print out the values in dictionary-like format */
+  // Print out the values in dictionary-like format */
 
   client = server.available();
   if (client) {
