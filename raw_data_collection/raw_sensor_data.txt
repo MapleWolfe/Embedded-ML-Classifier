@@ -1,0 +1,1 @@
+iteration	gesture_code	sensor_1_ax	sensor_1_ay	sensor_1_az	sensor_1_gx	sensor_1_gy	sensor_1_gz	sensor_2_ax	sensor_2_ay	sensor_2_az	sensor_2_gx	sensor_2_gy	sensor_2_gz	onboard_ax	onboard_ay	onboard_az	onboard_gx	onboard_gy	onboard_gz

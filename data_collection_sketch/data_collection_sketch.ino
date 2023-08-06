@@ -14,8 +14,7 @@ char password[] = "12345678";
 float accX, accY, accZ, gyroX, gyroY, gyroZ;
 float sensor_1_ax = 0, sensor_1_ay = 0, sensor_1_az = 0, sensor_1_gx = 0, sensor_1_gy = 0, sensor_1_gz = 0;
 float sensor_2_ax = 0, sensor_2_ay = 0, sensor_2_az = 0, sensor_2_gx = 0, sensor_2_gy = 0, sensor_2_gz = 0;
-float onboard_ax = 0, onboard_ay = 0, onboard_az = 0, onboard_gx = 0, onboard_gy = 0, onboard_gz = 0;
-int received_data = 0;
+float onboard_ax = 0, onboard_ay = 0, onboard_az = 0, onboard_gx = 0, onboard_gy = 0, onboard_gz = 0; int iteration = 0;
 
 WiFiServer server(8888);
 WiFiClient client;
@@ -106,59 +105,65 @@ void setup(void) {
 }
 
 void loop() {
-  delay(1000);
+  int receivedData = 999;
+  client = server.available();
+  if (client){
+    String data = client.readStringUntil('\n');
+    int receivedData = data.toInt();
+    Serial.println(receivedData);
+    if (receivedData != 999) {
+      while (true) {
   // Get new sensor 1 events with the readings */
-  sensors_event_t a1, g1, temp1;
-  mpu1.getEvent(&a1, &g1, &temp1);
-  sensor_1_ax = a1.acceleration.x;
-  sensor_1_ay = a1.acceleration.y;
-  sensor_1_az = a1.acceleration.z;
-  sensor_1_gx = g1.gyro.x;
-  sensor_1_gy = g1.gyro.y;
-  sensor_1_gz = g1.gyro.z;
+        sensors_event_t a1, g1, temp1;
+        mpu1.getEvent(&a1, &g1, &temp1);
+        sensor_1_ax = a1.acceleration.x;
+        sensor_1_ay = a1.acceleration.y;
+        sensor_1_az = a1.acceleration.z;
+        sensor_1_gx = g1.gyro.x;
+        sensor_1_gy = g1.gyro.y;
+        sensor_1_gz = g1.gyro.z;
   
   // Get new sensor 2 events with the readings */
-  sensors_event_t a2, g2, temp2;
-  mpu2.getEvent(&a2, &g2, &temp2);
-  sensor_2_ax = a2.acceleration.x;
-  sensor_2_ay = a2.acceleration.y;
-  sensor_2_az = a2.acceleration.z;
-  sensor_2_gx = g2.gyro.x;
-  sensor_2_gy = g2.gyro.y;
-  sensor_2_gz = g2.gyro.z;
+        sensors_event_t a2, g2, temp2;
+        mpu2.getEvent(&a2, &g2, &temp2);
+        sensor_2_ax = a2.acceleration.x;
+        sensor_2_ay = a2.acceleration.y;
+        sensor_2_az = a2.acceleration.z;
+        sensor_2_gx = g2.gyro.x;
+        sensor_2_gy = g2.gyro.y;
+        sensor_2_gz = g2.gyro.z;
 
-  if (IMU.accelerationAvailable()){
-    IMU.readAcceleration(accX, accY, accZ);
-    onboard_ax = accX;
-    onboard_ay = accY;
-    onboard_az = accZ;
+        if (IMU.accelerationAvailable()){
+          IMU.readAcceleration(accX, accY, accZ);
+          onboard_ax = accX;
+          onboard_ay = accY;
+          onboard_az = accZ;
 
-  }
-  if (IMU.gyroscopeAvailable()) {
-    IMU.readGyroscope(gyroX, gyroY, gyroZ);
-    onboard_gx = gyroX;
-    onboard_gy = gyroY;
-    onboard_gz = gyroZ;
-  }
+        }
+        if (IMU.gyroscopeAvailable()) {
+          IMU.readGyroscope(gyroX, gyroY, gyroZ);
+          onboard_gx = gyroX;
+          onboard_gy = gyroY;
+          onboard_gz = gyroZ;
+        }
   // Print out the values in dictionary-like format */
-
-  client = server.available();
-  if (client) {
-    while (client.connected()) {
-      // Check if there's data available
-      if (client.available()) {
-        // Read the data from the client
-        String data = client.readStringUntil('\n');
-        int receivedData = data.toInt();
-        String str_output = String(receivedData)+"\t"+String(sensor_1_ax)+"\t"+String(sensor_1_ay)+"\t"+String(sensor_1_az)+"\t"+
+        String str_output = String(sensor_1_ax)+"\t"+String(sensor_1_ay)+"\t"+String(sensor_1_az)+"\t"+
         String(sensor_1_gx)+"\t"+String(sensor_1_gy)+"\t"+String(sensor_1_gz)+"\t"+
         String(sensor_2_ax)+"\t"+String(sensor_2_ay)+"\t"+String(sensor_2_az)+"\t"+
         String(sensor_2_gx)+"\t"+String(sensor_2_gy)+"\t"+String(sensor_2_gz)+"\t"+
         String(onboard_ax)+"\t"+String(onboard_ay)+"\t"+String(onboard_az)+"\t"+
         String(onboard_gx)+"\t"+String(onboard_gy)+"\t"+String(onboard_gz);
-
+        delay(100);
         client.print(str_output);
+        Serial.println(str_output);
+        iteration++;
+        if (iteration == 25) {
+          iteration = 0;
+          break; // Exit the loop after 50 iterations
         }
       }
     }
+    Serial.println("its a break");
+    delay(2000);
   }
+}
