@@ -4,7 +4,7 @@
 #include <Wire.h>
 #include <best_rfc_model.h>
 #include <math.h>
-
+#include <ArduinoBLE.h>
 Eloquent::ML::Port::RandomForest clf;
 // XGBClassifier
 // RandomForest
@@ -23,6 +23,11 @@ float onboard_ax_list[numSamples], onboard_ay_list[numSamples], onboard_az_list[
 float combined_output_list[108];
 
 int sampleIndex = 0;
+
+// bluetooth set up
+BLEService ClfService("98ac7d69-32e9-4dd9-8ea8-0d1ace729b1c"); // BLE LED Service UIUD is the text
+BLEByteCharacteristic ClfCharacteristic("98ac7d69-32e9-4dd9-8ea8-0d1ace729b1c", BLERead | BLEWrite);
+
 
 // Here we create objects for the sensor
 Adafruit_MPU6050 mpu1; 
@@ -68,9 +73,31 @@ void setup(void) {
   // Set accelerometer range for MPU6050 at address 0x69
   mpu2.setAccelerometerRange(MPU6050_RANGE_8_G);
   
+  // setup bluetooth
+  if (BLE.begin()) {
+    Serial.println("Bluetooth started!");
+  } else {
+    Serial.println("Bluetooth failed to start!");
+  }
+
+  BLE.setLocalName("Glove");
+  BLE.setAdvertisedService(ClfService);
+  ClfService.addCharacteristic(ClfCharacteristic);
+  // add service
+  BLE.addService(ClfService);
+  // start advertising
+  BLE.advertise();
+  Serial.println("device is now advertising");
+
   }
 
 void loop() {
+  BLEDevice central = BLE.central();
+  if (central) {
+    Serial.print("Connected to central: ");
+    Serial.println(central.address());
+
+  }
   // Get new sensor 1 events with the readings */
   sensors_event_t a1, g1, temp1;
   mpu1.getEvent(&a1, &g1, &temp1);
@@ -157,9 +184,13 @@ void loop() {
 //        for (int i = 0; i < 108; i++) {
 //          Serial.print(String(combined_output_list[i])+"\t");
 //        }
-        Serial.println("printout: "+ String(clf.predict(combined_output_list)));
-        delay(4000);
-    }
+        int clf_output = clf.predict(combined_output_list);
+        Serial.println("prediction: "+ String(clf_output));
+        ClfCharacteristic.writeValue((byte)0x03);
+        
+        delay(2000);
+    
+  }
 }
   
 void calculateStatistics(float data[], int dataSize, float data_store[], int iterator) {
@@ -204,7 +235,8 @@ void calculateStatistics(float data[], int dataSize, float data_store[], int ite
     data_store[iterator+5] = maximum;
 
     iteration = iterator+6;
-    Serial.println(iteration);
+    // Serial.println(iteration);
 
   }
+
 

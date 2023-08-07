@@ -1,1 +1,1 @@
-{"right_l": 0, "reverse_l": 1, "square": 2, "stop": 3, "forward": 4, "right": 5, "left": 6, "back": 7, "forward wave": 8, "no gesture": 9}
+{"right_l": 0, "left_l": 1, "square": 2, "reverse_square": 3, "forward": 4, "back": 5, "right": 6, "left": 7, "no gesture": 8}
